@@ -1,0 +1,167 @@
+# OpsPulse
+
+OpsPulse is an AI-powered observability and incident intelligence platform designed for modern engineering teams operating distributed systems.
+
+## The real technical-sector problem
+
+Modern product teams increasingly run distributed systems across multiple services, environments, and dependencies. The challenge is not simply uptime — it is visibility.
+
+When systems grow complex, teams often face:
+- delayed incident detection,
+- fragmented logs, metrics, and traces,
+- noisy alerts and slow triage,
+- weak root-cause analysis,
+- expensive downtime and recovery costs,
+- low confidence during outages.
+
+OpsPulse addresses this by correlating service signals, surfacing issue states, and helping teams reason more quickly under operational pressure.
+
+## Product vision
+
+OpsPulse helps teams answer three critical questions in real time:
+
+1. Is the system healthy?
+2. Which service is failing or degrading?
+3. What is the most likely cause, and what should the team do next?
+
+## Why this matters
+
+This is a real technical-sector pain point. Every minute of customer-facing downtime affects:
+- revenue,
+- retention,
+- engineering effort,
+- user trust,
+- and brand reliability.
+
+Observability has become an operational necessity, not just a tooling preference.
+
+## Core features
+
+- real-time service health dashboard
+- latency, throughput, and error-rate monitoring
+- alert correlation and incident summaries
+- AI-ready root-cause suggestion layer
+- dashboard and landing-page experience for product storytelling
+- persistence layer for incident data and operational records
+
+## Current MVP
+
+This repository now includes:
+- FastAPI backend
+- static landing-page experience
+- interactive monitoring dashboard
+- in-memory and persisted incident context
+- startup-ready project structure
+- Docker and deployment-friendly setup
+
+## Tech stack
+
+- Python
+- FastAPI
+- Jinja2
+- HTML/CSS/JavaScript
+- SQLite for basic persistence
+- OpenTelemetry-ready design
+
+## Project structure
+
+```text
+ops-pulse/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   └── store.py
+├── data/
+│   └── .gitkeep
+├── static/
+│   ├── app.js
+│   └── styles.css
+├── templates/
+│   └── index.html
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── STRATEGY.md
+│   └── PITCH.md
+├── .env.example
+├── Dockerfile
+├── docker-compose.yml
+├── .gitignore
+├── README.md
+├── requirements.txt
+└──
+```
+
+## Local development
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### Docker run
+
+```bash
+docker build -t opspulse .
+docker run -p 8000:8000 opspulse
+```
+
+or
+
+```bash
+docker-compose up --build
+```
+
+Then open:
+
+- http://localhost:8000/
+- http://localhost:8000/dashboard
+- http://localhost:8000/docs
+
+## API endpoints
+
+- GET /
+- GET /dashboard
+- GET /health
+- GET /metrics
+- GET /alerts
+- GET /incidents
+- POST /incidents
+- POST /analyze
+
+## Example incident insight
+
+> Payments API latency spiked by 42% after a recent deployment. Error rate increased in the checkout pipeline while upstream dependency health fell below baseline.
+
+## Target customers
+
+- early-stage startups with growing service complexity,
+- SaaS companies with distributed systems,
+- product engineering teams with limited DevOps bandwidth,
+- technical teams needing more operational visibility without enterprise-level overhead.
+
+## Business opportunity
+
+The market is crowded with observability vendors, but many solutions are:
+- too expensive for smaller teams,
+- difficult to adopt quickly,
+- overloaded with features that are not useful to growing startups.
+
+OpsPulse is positioned as a practical, streamlined, AI-inspired platform for teams that need faster signal detection and clearer root-cause analysis.
+
+## Roadmap
+
+- v0.1: dashboard and alert API
+- v0.2: anomaly detection and signal correlation
+- v0.3: AI-generated incident summaries
+- v0.4: Slack/email workflow integrations
+- v0.5: deployment and production templates
+
+## Persistence and data model
+
+The project now includes a SQLite-backed data layer for operational records. This allows basic persistence of incident events and future expansion into telemetry ingestion, alert routing, and richer customer workflows.
+
+## License
+
+MIT

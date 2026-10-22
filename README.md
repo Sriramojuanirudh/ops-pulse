@@ -1,94 +1,167 @@
-async function fetchDashboard() {
-  const metricsResponse = await fetch('/metrics');
-  const alertsResponse = await fetch('/alerts');
-  const incidentsResponse = await fetch('/incidents');
+import sqlite3
+from pathlib import Path
+from typing import Any, Dict, List
 
-  const metrics = await metricsResponse.json();
-  const alerts = await alertsResponse.json();
-  const incidents = await incidentsResponse.json();
+DB_PATH = Path(__file__).resolve().parent.parent / "data" / "ops_pulse.db"
 
-  renderSummary(metrics.summary);
-  renderServices(metrics.services);
-  renderAlerts(alerts);
-  renderIncidents(incidents);
-}
 
-function renderSummary(summary) {
-  const cards = [
-    { label: 'Healthy', value: summary.healthy_services, trend: '+12% vs last hour' },
-    { label: 'Warnings', value: summary.warning_services, trend: '3 services trending up' },
-    { label: 'Critical', value: summary.critical_services, trend: '1 service needs review' },
-    { label: 'MTTR', value: '19m', trend: 'down from 24m' },
-  ];
+def _get_connection() -> sqlite3.Connection:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-  const container = document.getElementById('summary-grid');
-  if (!container) return;
-  container.innerHTML = cards.map((card) => `
-    <div class="stat-card">
-      <div class="label">${card.label}</div>
-      <div class="value">${card.value}</div>
-      <div class="trend">${card.trend}</div>
-    </div>
-  `).join('');
-}
 
-function renderServices(services) {
-  const container = document.getElementById('services-table');
-  if (!container) return;
-  container.innerHTML = `
-    <table class="service-table">
-      <thead>
-        <tr>
-          <th>Service</th>
-          <th>Latency</th>
-          <th>Error</th>
-          <th>Throughput</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${services.map((service) => `
-          <tr>
-            <td>${service.name}</td>
-            <td>${service.latency_ms} ms</td>
-            <td>${(service.error_rate * 100).toFixed(1)}%</td>
-            <td>${service.throughput}</td>
-            <td><span class="status-pill status-${service.status}">${service.status}</span></td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
+def initialize_db() -> None:
+    with _get_connection() as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS incidents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                service TEXT NOT NULL,
+                summary TEXT NOT NULL,
+                status TEXT NOT NULL,
+                impact TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                service TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                message TEXT NOT NULL
+            )
+            """
+        )
 
-function renderAlerts(alerts) {
-  const container = document.getElementById('alerts-list');
-  if (!container) return;
-  container.innerHTML = alerts.map((alert) => `
-    <div class="alert-item">
-      <div class="alert-meta">
-        <strong>${alert.service}</strong>
-        <span>${alert.message}</span>
-      </div>
-      <span class="${alert.severity === 'high' ? 'red-dot' : alert.severity === 'medium' ? 'orange-dot' : 'green-dot'}"></span>
-    </div>
-  `).join('');
-}
+        if conn.execute("SELECT COUNT(*) FROM incidents").fetchone()[0] == 0:
+            conn.execute(
+                "INSERT INTO incidents (service, summary, status, impact) VALUES (?, ?, ?, ?)",
+                (
+                    "payments-api",
+                    "Payment processing latency spike and elevated retry count after deployment.",
+                    "Investigating",
+                    "customer checkout degradation",
+                ),
+            )
+            conn.execute(
+                "INSERT INTO incidents (service, summary, status, impact) VALUES (?, ?, ?, ?)",
+                (
+                    "checkout-api",
+                    "Partial service degradation caused by upstream dependency timeouts.",
+                    "Mitigated",
+                    "slow storefront response",
+                ),
+            )
 
-function renderIncidents(incidents) {
-  const container = document.getElementById('incidents-list');
-  if (!container) return;
-  container.innerHTML = incidents.map((incident) => `
-    <div class="incident-item">
-      <div class="incident-meta">
-        <strong>${incident.id} · ${incident.service}</strong>
-        <span>${incident.summary}</span>
-      </div>
-      <span class="status-pill status-${incident.status === 'Investigating' ? 'critical' : 'warning'}">${incident.status}</span>
-    </div>
-  `).join('');
-}
+        if conn.execute("SELECT COUNT(*) FROM alerts").fetchone()[0] == 0:
+            conn.execute(
+                "INSERT INTO alerts (service, severity, message) VALUES (?, ?, ?)",
+                ("payments-api", "high", "Latency spike detected on the payment pipeline."),
+            )
+            conn.execute(
+                "INSERT INTO alerts (service, severity, message) VALUES (?, ?, ?)",
+                ("checkout-api", "medium", "Error rate above normal threshold for 7 minutes."),
+            )
+            conn.execute(
+                "INSERT INTO alerts (service, severity, message) VALUES (?, ?, ?)",
+                ("inventory-service", "low", "Throughput dropped by 13% in the last interval."),
+            )
 
-if (document.getElementById('summary-grid')) {
-  fetchDashboard();
-}
+        conn.commit()
+
+
+def _classify_service(service_data: Dict[str, Any]) -> str:
+    if service_data.get("error_rate", 0) > 0.1 or service_data.get("latency_ms", 0) > 300:
+        return "critical"
+    if service_data.get("error_rate", 0) > 0.05 or service_data.get("latency_ms", 0) > 220:
+        return "warning"
+    return "healthy"
+
+
+def get_dashboard_snapshot() -> Dict[str, Any]:
+    services = [
+        {"name": "checkout-api", "latency_ms": 182, "error_rate": 0.04, "throughput": 1250, "region": "us-east-1"},
+        {"name": "payments-api", "latency_ms": 335, "error_rate": 0.14, "throughput": 980, "region": "us-west-2"},
+        {"name": "auth-service", "latency_ms": 141, "error_rate": 0.02, "throughput": 2150, "region": "eu-west-1"},
+        {"name": "inventory-service", "latency_ms": 210, "error_rate": 0.06, "throughput": 1680, "region": "ap-south-1"},
+    ]
+
+    service_metrics = []
+    healthy_count = 0
+    warning_count = 0
+    critical_count = 0
+
+    for service in services:
+        status = _classify_service(service)
+        if status == "healthy":
+            healthy_count += 1
+        elif status == "warning":
+            warning_count += 1
+        else:
+            critical_count += 1
+
+        service_metrics.append(
+            {
+                "name": service["name"],
+                "latency_ms": service["latency_ms"],
+                "error_rate": service["error_rate"],
+                "throughput": service["throughput"],
+                "region": service["region"],
+                "status": status,
+            }
+        )
+
+    with _get_connection() as conn:
+        incidents = [
+            {
+                "id": f"INC-{row['id']}",
+                "service": row["service"],
+                "status": row["status"],
+                "summary": row["summary"],
+                "impact": row["impact"],
+            }
+            for row in conn.execute(
+                "SELECT * FROM incidents ORDER BY id DESC LIMIT 10"
+            ).fetchall()
+        ]
+
+        alerts = [
+            {
+                "id": f"ALERT-{row['id']}",
+                "service": row["service"],
+                "severity": row["severity"],
+                "message": row["message"],
+            }
+            for row in conn.execute(
+                "SELECT * FROM alerts ORDER BY id DESC LIMIT 10"
+            ).fetchall()
+        ]
+
+    return {
+        "services": service_metrics,
+        "summary": {
+            "healthy_services": healthy_count,
+            "warning_services": warning_count,
+            "critical_services": critical_count,
+        },
+        "alerts": alerts,
+        "incidents": incidents,
+    }
+
+
+def save_incident(service: str, summary: str, status: str, impact: str) -> Dict[str, Any]:
+    with _get_connection() as conn:
+        cursor = conn.execute(
+            "INSERT INTO incidents (service, summary, status, impact) VALUES (?, ?, ?, ?)",
+            (service, summary, status, impact),
+        )
+        conn.commit()
+        return {"id": f"INC-{cursor.lastrowid}"}
+
+
+if __name__ == "__main__":
+    initialize_db()
+    print(f"Database initialized at {DB_PATH}")
