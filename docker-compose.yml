@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  opspulse:
+    build: .
+    container_name: opspulse
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - PORT=8000
+    restart: unless-stopped

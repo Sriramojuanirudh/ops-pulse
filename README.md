@@ -79,6 +79,13 @@ ops-pulse/
 │   └── styles.css
 ├── templates/
 │   └── index.html
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── STRATEGY.md
+│   └── PITCH.md
+├── .env.example
+├── Dockerfile
+├── docker-compose.yml
 ├── .gitignore
 ├── README.md
 ├── requirements.txt
@@ -92,6 +99,19 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn app.main:app --reload
+```
+
+### Docker run
+
+```bash
+docker build -t opspulse .
+docker run -p 8000:8000 opspulse
+```
+
+or
+
+```bash
+docker-compose up --build
 ```
 
 Then open:
@@ -135,6 +155,10 @@ OpsPulse is positioned as a practical, streamlined, AI-inspired platform for tea
 - v0.3: AI-generated incident summaries
 - v0.4: Slack/email workflow integrations
 - v0.5: deployment and production templates
+
+## Deployment notes
+
+The project is designed to be easy to deploy in a lightweight environment using Docker or a simple Python process. It can evolve to cloud-native infrastructure with persistence, alert workflows, and telemetry ingestion.
 
 ## License
 
