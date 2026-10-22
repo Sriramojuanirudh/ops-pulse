@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 
 app = FastAPI(
     title="OpsPulse",
-    version="1.0.0",
+    version="1.1.0",
     description="AI-powered observability and incident intelligence platform.",
 )
 
@@ -53,19 +53,34 @@ INCIDENTS = [
 
 
 def classify_signal(signal: Dict[str, Any]) -> str:
-    if signal["error_rate"] > 0.1 or signal["latency_ms"] > 300:
+    if signal.get("error_rate", 0) > 0.1 or signal.get("latency_ms", 0) > 300:
         return "critical"
-    if signal["error_rate"] > 0.05 or signal["latency_ms"] > 220:
+    if signal.get("error_rate", 0) > 0.05 or signal.get("latency_ms", 0) > 220:
         return "warning"
     return "healthy"
 
 
 @app.get("/")
-async def dashboard(request: Request):
+async def landing_page(request: Request):
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
+            "page_type": "landing",
+            "services": SERVICE_DATA,
+            "alerts": ALERTS,
+            "incidents": INCIDENTS,
+        },
+    )
+
+
+@app.get("/dashboard")
+async def dashboard_page(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "page_type": "dashboard",
             "services": SERVICE_DATA,
             "alerts": ALERTS,
             "incidents": INCIDENTS,
@@ -128,7 +143,6 @@ def get_incidents() -> List[Dict[str, str]]:
 @app.post("/analyze")
 def analyze_signals(signals: List[ServiceSignal]) -> Dict[str, Any]:
     findings = []
-
     for signal in signals:
         status = classify_signal(
             {

@@ -1,165 +1,94 @@
-# OpsPulse
+async function fetchDashboard() {
+  const metricsResponse = await fetch('/metrics');
+  const alertsResponse = await fetch('/alerts');
+  const incidentsResponse = await fetch('/incidents');
 
-OpsPulse is an AI-powered observability and incident intelligence platform designed for modern engineering teams operating distributed systems.
+  const metrics = await metricsResponse.json();
+  const alerts = await alertsResponse.json();
+  const incidents = await incidentsResponse.json();
 
-## The real technical-sector problem
+  renderSummary(metrics.summary);
+  renderServices(metrics.services);
+  renderAlerts(alerts);
+  renderIncidents(incidents);
+}
 
-The biggest operational problem in the technical sector today is not just software bugs — it is system blindness.
+function renderSummary(summary) {
+  const cards = [
+    { label: 'Healthy', value: summary.healthy_services, trend: '+12% vs last hour' },
+    { label: 'Warnings', value: summary.warning_services, trend: '3 services trending up' },
+    { label: 'Critical', value: summary.critical_services, trend: '1 service needs review' },
+    { label: 'MTTR', value: '19m', trend: 'down from 24m' },
+  ];
 
-Teams increasingly run:
-- microservices and distributed APIs,
-- cloud infrastructure across multiple regions,
-- third-party dependencies and event-driven workflows,
-- high-traffic customer-facing services with minimal downtime tolerance.
+  const container = document.getElementById('summary-grid');
+  if (!container) return;
+  container.innerHTML = cards.map((card) => `
+    <div class="stat-card">
+      <div class="label">${card.label}</div>
+      <div class="value">${card.value}</div>
+      <div class="trend">${card.trend}</div>
+    </div>
+  `).join('');
+}
 
-As systems grow more complex, teams face:
-- delayed incident detection,
-- fragmented logs and metrics,
-- slow root-cause analysis,
-- noisy alerting,
-- expensive downtime and recovery effort,
-- poor confidence during production failures.
+function renderServices(services) {
+  const container = document.getElementById('services-table');
+  if (!container) return;
+  container.innerHTML = `
+    <table class="service-table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Latency</th>
+          <th>Error</th>
+          <th>Throughput</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${services.map((service) => `
+          <tr>
+            <td>${service.name}</td>
+            <td>${service.latency_ms} ms</td>
+            <td>${(service.error_rate * 100).toFixed(1)}%</td>
+            <td>${service.throughput}</td>
+            <td><span class="status-pill status-${service.status}">${service.status}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
 
-OpsPulse solves this by correlating signals across services and helping engineers detect anomalies and likely incident causes faster.
+function renderAlerts(alerts) {
+  const container = document.getElementById('alerts-list');
+  if (!container) return;
+  container.innerHTML = alerts.map((alert) => `
+    <div class="alert-item">
+      <div class="alert-meta">
+        <strong>${alert.service}</strong>
+        <span>${alert.message}</span>
+      </div>
+      <span class="${alert.severity === 'high' ? 'red-dot' : alert.severity === 'medium' ? 'orange-dot' : 'green-dot'}"></span>
+    </div>
+  `).join('');
+}
 
-## Product vision
+function renderIncidents(incidents) {
+  const container = document.getElementById('incidents-list');
+  if (!container) return;
+  container.innerHTML = incidents.map((incident) => `
+    <div class="incident-item">
+      <div class="incident-meta">
+        <strong>${incident.id} · ${incident.service}</strong>
+        <span>${incident.summary}</span>
+      </div>
+      <span class="status-pill status-${incident.status === 'Investigating' ? 'critical' : 'warning'}">${incident.status}</span>
+    </div>
+  `).join('');
+}
 
-OpsPulse helps teams answer three critical questions during an outage:
-
-1. Is the system healthy?
-2. Which service is failing or degrading?
-3. What is the most likely cause, and what should be done next?
-
-## Why it matters
-
-This is a real-world problem in the technical industry because every minute of customer-facing downtime directly impacts:
-- revenue,
-- user trust,
-- retention,
-- engineering effort,
-- and brand reliability.
-
-Observability is no longer optional. It is core infrastructure.
-
-## Core features
-
-- Real-time service health dashboard
-- Latency, throughput, and error-rate monitoring
-- Incident timeline and alert correlation
-- AI-assisted root-cause suggestions
-- Operational summaries for engineering teams
-- Future integrations with Slack, email, and incident tools
-
-## Current MVP
-
-This repository includes a working MVP with:
-- FastAPI backend
-- dashboard UI
-- metrics and alert APIs
-- incident data simulation
-- startup-ready project structure
-
-## Tech stack
-
-- Python
-- FastAPI
-- Jinja2
-- HTML/CSS/JavaScript
-- OpenTelemetry-ready architecture
-
-## Project structure
-
-```text
-ops-pulse/
-├── app/
-│   ├── __init__.py
-│   └── main.py
-├── static/
-│   ├── app.js
-│   └── styles.css
-├── templates/
-│   └── index.html
-├── docs/
-│   ├── ARCHITECTURE.md
-│   ├── STRATEGY.md
-│   └── PITCH.md
-├── .env.example
-├── Dockerfile
-├── docker-compose.yml
-├── .gitignore
-├── README.md
-├── requirements.txt
-└── 
-```
-
-## Local development
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
-
-### Docker run
-
-```bash
-docker build -t opspulse .
-docker run -p 8000:8000 opspulse
-```
-
-or
-
-```bash
-docker-compose up --build
-```
-
-Then open:
-
-- http://localhost:8000/
-- http://localhost:8000/docs
-
-## API endpoints
-
-- GET /
-- GET /health
-- GET /metrics
-- GET /alerts
-- GET /incidents
-- POST /analyze
-
-## Example incident insight
-
-> Payments API latency spiked by 42% after a recent deployment. Error rate increased in the checkout pipeline while upstream dependency health fell below baseline.
-
-## Target customers
-
-- early-stage startups with growing service complexity,
-- SaaS companies with distributed systems,
-- product engineering teams with limited DevOps bandwidth,
-- technical teams needing more operational visibility without enterprise-level overhead.
-
-## Business opportunity
-
-The market is crowded with observability vendors, but many solutions are:
-- too expensive for smaller teams,
-- difficult to adopt quickly,
-- overloaded with features that are not useful to growing startups.
-
-OpsPulse is positioned as a practical, streamlined, AI-inspired platform for teams that need faster signal detection and easier root-cause analysis.
-
-## Roadmap
-
-- v0.1: dashboard and alert API
-- v0.2: anomaly detection and signal correlation
-- v0.3: AI-generated incident summaries
-- v0.4: Slack/email workflow integrations
-- v0.5: deployment and production templates
-
-## Deployment notes
-
-The project is designed to be easy to deploy in a lightweight environment using Docker or a simple Python process. It can evolve to cloud-native infrastructure with persistence, alert workflows, and telemetry ingestion.
-
-## License
-
-MIT
+if (document.getElementById('summary-grid')) {
+  fetchDashboard();
+}
