@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpsPulse Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="logo">O</div>
+          <div>
+            <h1>OpsPulse</h1>
+            <p>Incident Intelligence</p>
+          </div>
+        </div>
+
+        <nav>
+          <a href="#" class="active">Overview</a>
+          <a href="#">Services</a>
+          <a href="#">Incidents</a>
+          <a href="#">Alerts</a>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Operations</p>
+            <h2>Production Overview</h2>
+          </div>
+          <button class="primary-btn">Create Incident</button>
+        </header>
+
+        <section class="stats-grid" id="summary-grid"></section>
+
+        <section class="content-grid">
+          <div class="panel service-panel">
+            <div class="panel-header">
+              <h3>Services</h3>
+              <span>Live telemetry</span>
+            </div>
+            <div id="services-table"></div>
+          </div>
+
+          <div class="panel alert-panel">
+            <div class="panel-header">
+              <h3>Active Alerts</h3>
+              <span>Latest</span>
+            </div>
+            <div id="alerts-list"></div>
+          </div>
+        </section>
+
+        <section class="panel incident-panel">
+          <div class="panel-header">
+            <h3>Recent Incidents</h3>
+            <span>Correlated view</span>
+          </div>
+          <div id="incidents-list"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

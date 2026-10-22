@@ -1,0 +1,162 @@
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
+from typing import Any, Dict, List
+
+app = FastAPI(
+    title="OpsPulse",
+    version="1.0.0",
+    description="AI-powered observability and incident intelligence platform.",
+)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+
+class ServiceSignal(BaseModel):
+    service: str
+    latency_ms: float
+    error_rate: float
+    throughput: int
+
+
+SERVICE_DATA = [
+    {"name": "checkout-api", "latency_ms": 182, "error_rate": 0.04, "throughput": 1250, "region": "us-east-1"},
+    {"name": "payments-api", "latency_ms": 335, "error_rate": 0.14, "throughput": 980, "region": "us-west-2"},
+    {"name": "auth-service", "latency_ms": 141, "error_rate": 0.02, "throughput": 2150, "region": "eu-west-1"},
+    {"name": "inventory-service", "latency_ms": 210, "error_rate": 0.06, "throughput": 1680, "region": "ap-south-1"},
+]
+
+ALERTS = [
+    {"id": "ALERT-201", "service": "payments-api", "severity": "high", "message": "Latency spike detected on the payment pipeline."},
+    {"id": "ALERT-202", "service": "checkout-api", "severity": "medium", "message": "Error rate above normal threshold for 7 minutes."},
+    {"id": "ALERT-203", "service": "inventory-service", "severity": "low", "message": "Throughput dropped by 13% in the last interval."},
+]
+
+INCIDENTS = [
+    {
+        "id": "INC-1001",
+        "service": "payments-api",
+        "status": "Investigating",
+        "summary": "Payment processing latency spike and elevated retry count after deployment.",
+        "impact": "customer checkout degradation",
+    },
+    {
+        "id": "INC-1002",
+        "service": "checkout-api",
+        "status": "Mitigated",
+        "summary": "Partial service degradation caused by upstream dependency timeouts.",
+        "impact": "slow storefront response",
+    },
+]
+
+
+def classify_signal(signal: Dict[str, Any]) -> str:
+    if signal["error_rate"] > 0.1 or signal["latency_ms"] > 300:
+        return "critical"
+    if signal["error_rate"] > 0.05 or signal["latency_ms"] > 220:
+        return "warning"
+    return "healthy"
+
+
+@app.get("/")
+async def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request,
+            "services": SERVICE_DATA,
+            "alerts": ALERTS,
+            "incidents": INCIDENTS,
+        },
+    )
+
+
+@app.get("/health")
+def health_check() -> Dict[str, str]:
+    return {"status": "ok", "service": "ops-pulse"}
+
+
+@app.get("/metrics")
+def metrics() -> Dict[str, Any]:
+    service_metrics = []
+    healthy_count = 0
+    warning_count = 0
+    critical_count = 0
+
+    for service in SERVICE_DATA:
+        state = classify_signal(service)
+        if state == "healthy":
+            healthy_count += 1
+        elif state == "warning":
+            warning_count += 1
+        else:
+            critical_count += 1
+
+        service_metrics.append(
+            {
+                "name": service["name"],
+                "latency_ms": service["latency_ms"],
+                "error_rate": service["error_rate"],
+                "throughput": service["throughput"],
+                "region": service["region"],
+                "status": state,
+            }
+        )
+
+    return {
+        "services": service_metrics,
+        "summary": {
+            "healthy_services": healthy_count,
+            "warning_services": warning_count,
+            "critical_services": critical_count,
+        },
+    }
+
+
+@app.get("/alerts")
+def get_alerts() -> List[Dict[str, str]]:
+    return ALERTS
+
+
+@app.get("/incidents")
+def get_incidents() -> List[Dict[str, str]]:
+    return INCIDENTS
+
+
+@app.post("/analyze")
+def analyze_signals(signals: List[ServiceSignal]) -> Dict[str, Any]:
+    findings = []
+
+    for signal in signals:
+        status = classify_signal(
+            {
+                "latency_ms": signal.latency_ms,
+                "error_rate": signal.error_rate,
+                "throughput": signal.throughput,
+            }
+        )
+
+        if status == "critical":
+            recommendation = "Investigate recent deployment and dependency timeouts immediately."
+        elif status == "warning":
+            recommendation = "Monitor upstream dependency health and compare against recent baseline trends."
+        else:
+            recommendation = "No action required; service remains within baseline thresholds."
+
+        findings.append(
+            {
+                "service": signal.service,
+                "status": status,
+                "recommendation": recommendation,
+            }
+        )
+
+    return {"findings": findings}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
