@@ -3,67 +3,138 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OpsPulse Dashboard</title>
+    <title>OpsPulse | AI-Powered Observability</title>
     <link rel="stylesheet" href="/static/styles.css" />
   </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
+  <body class="landing-body">
+    <header class="landing-header">
+      <nav class="landing-nav">
+        <div class="brand-wrap">
           <div class="logo">O</div>
-          <div>
-            <h1>OpsPulse</h1>
-            <p>Incident Intelligence</p>
+          <span>OpsPulse</span>
+        </div>
+        <div class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#problem">Problem</a>
+          <a href="#solution">Solution</a>
+          <a href="#customers">Customers</a>
+        </div>
+        <button class="nav-btn">Book Demo</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="tag">AI-POWERED OBSERVABILITY</span>
+          <h1>Turn noisy systems into clear operational signal.</h1>
+          <p>
+            OpsPulse helps engineering teams detect failures earlier, find root cause faster,
+            and reduce downtime across distributed systems.
+          </p>
+          <div class="cta-row">
+            <button class="primary-btn">Get Started</button>
+            <button class="secondary-btn">View Dashboard</button>
+          </div>
+          <div class="mini-metrics">
+            <div>
+              <strong>42%</strong>
+              <span>faster incident diagnosis</span>
+            </div>
+            <div>
+              <strong>19m</strong>
+              <span>average MTTR</span>
+            </div>
+            <div>
+              <strong>99.9%</strong>
+              <span>team confidence</span>
+            </div>
           </div>
         </div>
-
-        <nav>
-          <a href="#" class="active">Overview</a>
-          <a href="#">Services</a>
-          <a href="#">Incidents</a>
-          <a href="#">Alerts</a>
-        </nav>
-      </aside>
-
-      <main class="main-panel">
-        <header class="topbar">
-          <div>
-            <p class="eyebrow">Operations</p>
-            <h2>Production Overview</h2>
-          </div>
-          <button class="primary-btn">Create Incident</button>
-        </header>
-
-        <section class="stats-grid" id="summary-grid"></section>
-
-        <section class="content-grid">
-          <div class="panel service-panel">
-            <div class="panel-header">
-              <h3>Services</h3>
-              <span>Live telemetry</span>
+        <div class="hero-visual">
+          <div class="graph-card">
+            <div class="graph-header">
+              <span>Service health</span>
+              <span class="live-pill">LIVE</span>
             </div>
-            <div id="services-table"></div>
-          </div>
-
-          <div class="panel alert-panel">
-            <div class="panel-header">
-              <h3>Active Alerts</h3>
-              <span>Latest</span>
+            <div class="bars">
+              <span style="height: 38%"></span>
+              <span style="height: 56%"></span>
+              <span style="height: 72%"></span>
+              <span style="height: 86%"></span>
+              <span style="height: 66%"></span>
+              <span style="height: 90%"></span>
             </div>
-            <div id="alerts-list"></div>
+            <div class="graph-footer">
+              <div><strong>Payments API</strong><small>Critical</small></div>
+              <div><strong>Auth Service</strong><small>Healthy</small></div>
+            </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="panel incident-panel">
-          <div class="panel-header">
-            <h3>Recent Incidents</h3>
-            <span>Correlated view</span>
+      <section id="problem" class="info-section">
+        <div class="section-heading">
+          <span class="eyebrow">The problem</span>
+          <h2>Modern systems are too complex to diagnose manually.</h2>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>Fragmented telemetry</h3>
+            <p>Logs, metrics, and traces are spread across tools, teams, and services.</p>
           </div>
-          <div id="incidents-list"></div>
-        </section>
-      </main>
-    </div>
+          <div class="feature-card">
+            <h3>Slow detection</h3>
+            <p>Incidents often surface only after user impact is already visible.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Hard root-cause analysis</h3>
+            <p>Teams waste time piecing together signals without a clear operational picture.</p>
+          </div>
+        </div>
+      </section>
 
-    <script src="/static/app.js"></script>
+      <section id="solution" class="info-section alt-bg">
+        <div class="section-heading">
+          <span class="eyebrow">The solution</span>
+          <h2>OpsPulse correlates service signals and highlights what matters.</h2>
+        </div>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h3>Signal correlation</h3>
+            <p>Connect latency, throughput, and error-rate events across services.</p>
+          </div>
+          <div class="feature-card">
+            <h3>AI-assisted summaries</h3>
+            <p>Generate concise, actionable explanations for likely root cause and impact.</p>
+          </div>
+          <div class="feature-card">
+            <h3>Operational clarity</h3>
+            <p>Give engineers a single place to understand health, incidents, and next steps.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="customers" class="info-section">
+        <div class="section-heading">
+          <span class="eyebrow">Who it's for</span>
+          <h2>Built for growing technical teams.</h2>
+        </div>
+        <div class="feature-grid compact-grid">
+          <div class="feature-card">
+            <h3>Startups</h3>
+            <p>Teams with rapid growth and limited operations bandwidth.</p>
+          </div>
+          <div class="feature-card">
+            <h3>SaaS platforms</h3>
+            <p>Engineering teams that need fast insight into customer-impacting incidents.</p>
+          </div>
+          <div class="feature-card">
+            <h3>DevOps teams</h3>
+            <p>Ops teams that want better signal quality and incident clarity.</p>
+          </div>
+        </div>
+      </section>
+    </main>
   </body>
 </html>
