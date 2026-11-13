@@ -1,25 +1,44 @@
-# Startup pitch summary
+# OpsPulse Architecture
 
-OpsPulse is an AI-powered observability platform for engineering teams that want to detect incidents faster and diagnose root cause with less guesswork.
+## Overview
 
-The product solves a real technical-sector pain point: modern systems are too complex for manual monitoring and fragmented toolchains.
+OpsPulse is an AI-assisted observability platform for engineering teams. It ingests service telemetry, detects anomalies, correlates events, and surfaces likely root cause explanations.
 
-We help teams move from reactive firefighting to proactive operational insight.
+## System design
 
-## Problem
-- microservices and distributed systems create signal noise
-- outage detection is often delayed
-- root cause analysis is slow and manual
-- teams lack a single operational view
+### 1. Frontend
+- Landing page for product pitch and positioning
+- Dashboard for service health, incidents, and alerts
+- Lightweight JavaScript rendering for dynamic overview cards
 
-## Solution
-- live service health dashboard
-- correlated alerts and incidents
-- AI-assisted recommendations
-- simplified operational clarity for growing engineering teams
+### 2. API layer
+- FastAPI endpoints for health checks, service telemetry, and incident actions
+- Clean separation between presentation and logic
 
-## Why it matters
-Production reliability is critical for user trust, revenue protection, and product stability.
+### 3. Storage layer
+- SQLite for local development and demo data persistence
+- Seeded telemetry and incident records for product validation
 
-## Why now
-The cost of downtime is high, and the market already expects richer monitoring capabilities. Teams need a more practical and approachable solution.
+### 4. Intelligence layer
+- Rule-based classification for service health
+- Alert severity evaluation based on latency and error thresholds
+- Extension point for future AI summarization and anomaly detection
+
+### 5. Deployment
+- Docker support for containerized development and deployment
+- Compose-based local environment for quick iteration
+
+## Data flow
+
+1. Service metrics are sent to the API.
+2. Telemetry is analyzed and classified.
+3. Alerts and incidents are generated or persisted.
+4. Dashboard renders status, trends, and actionable insights.
+
+## Future roadmap
+
+- OpenTelemetry collectors for real metrics and traces
+- PostgreSQL for production-ready persistence
+- AI summarization and inferred root-cause analysis
+- Slack/email notifications and incident routing
+- RBAC, audit logs, and enterprise team management

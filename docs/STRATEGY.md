@@ -1,45 +1,25 @@
-# Product strategy and roadmap
+# Startup pitch summary
 
-## Problem statement
+OpsPulse is an AI-powered observability platform for engineering teams that want to detect incidents faster and diagnose root cause with less guesswork.
 
-Engineering teams lose time and trust when production signals are noisy, fragmented, or delayed. The product gap is a faster way to understand system health and incident impact.
+The product solves a real technical-sector pain point: modern systems are too complex for manual monitoring and fragmented toolchains.
 
-## Target market
+We help teams move from reactive firefighting to proactive operational insight.
 
-- SaaS startups with distributed services
-- DevOps and platform engineering teams
-- Product-led engineering organizations with moderate operational complexity
+## Problem
+- microservices and distributed systems create signal noise
+- outage detection is often delayed
+- root cause analysis is slow and manual
+- teams lack a single operational view
 
-## Value proposition
+## Solution
+- live service health dashboard
+- correlated alerts and incidents
+- AI-assisted recommendations
+- simplified operational clarity for growing engineering teams
 
-OpsPulse reduces downtime risk by helping teams detect issues earlier and understand the most likely root cause faster.
+## Why it matters
+Production reliability is critical for user trust, revenue protection, and product stability.
 
-## Monetization model
-
-- freemium for small teams
-- paid team plan with SLA and alert routing
-- enterprise plan with RBAC, audit logs, and integrations
-
-## Roadmap
-
-### Phase 1: MVP
-- service health dashboard
-- alert generation
-- incident summaries
-- API-driven structure
-
-### Phase 2: Intelligence layer
-- anomaly detection
-- better incident correlation
-- AI-generated explanations
-
-### Phase 3: Team workflow
-- Slack notifications
-- email alert routing
-- issue linking and escalation workflows
-
-### Phase 4: Enterprise-ready
-- authentication
-- backups and persistence
-- cloud architecture
-- role-based permissions
+## Why now
+The cost of downtime is high, and the market already expects richer monitoring capabilities. Teams need a more practical and approachable solution.

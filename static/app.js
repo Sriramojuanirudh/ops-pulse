@@ -2,11 +2,35 @@
   box-sizing: border-box;
 }
 
+:root {
+  --bg-900: #050d18;
+  --bg-800: #0a1624;
+  --bg-700: #0f2030;
+  --panel: rgba(15, 25, 38, 0.9);
+  --panel-alt: rgba(13, 21, 30, 0.95);
+  --border: rgba(255, 255, 255, 0.08);
+  --text: #edf5ff;
+  --muted: #9cb5d6;
+  --blue: #63b3ff;
+  --purple: #7e6df2;
+  --green: #6ee7b7;
+  --yellow: #f7c948;
+  --red: #ff6b7a;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
-  font-family: Inter, Arial, sans-serif;
-  background: linear-gradient(180deg, #050d18 0%, #0b1727 100%);
-  color: #edf4ff;
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg-900) 0%, var(--bg-800) 100%);
+  color: var(--text);
+}
+
+img {
+  max-width: 100%;
 }
 
 .landing-body {
@@ -20,12 +44,12 @@ body {
 
 .landing-header {
   padding: 22px 6vw;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  background: rgba(7, 15, 25, 0.7);
+  border-bottom: 1px solid var(--border);
+  background: rgba(7, 15, 25, 0.72);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
 }
 
 .landing-nav {
@@ -34,6 +58,7 @@ body {
   justify-content: space-between;
   max-width: 1200px;
   margin: 0 auto;
+  gap: 18px;
 }
 
 .brand-wrap {
@@ -49,13 +74,15 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #48b1ff, #7c67ff);
+  background: linear-gradient(135deg, var(--blue), var(--purple));
   color: white;
+  font-weight: 700;
 }
 
 .nav-links {
   display: flex;
   gap: 28px;
+  align-items: center;
 }
 
 .nav-links a {
@@ -77,18 +104,25 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-btn:hover,
+.primary-btn:hover,
+.secondary-btn:hover {
+  transform: translateY(-1px);
 }
 
 .nav-btn,
 .primary-btn {
-  background: linear-gradient(135deg, #3ea8ff, #685df2);
+  background: linear-gradient(135deg, var(--blue), var(--purple));
   color: white;
 }
 
 .secondary-btn {
-  background: rgba(255,255,255,0.04);
-  color: #edf4ff;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  border: 1px solid var(--border);
 }
 
 .hero {
@@ -104,7 +138,7 @@ body {
 .tag {
   display: inline-block;
   padding: 8px 12px;
-  background: rgba(73, 130, 255, 0.12);
+  background: rgba(99, 179, 255, 0.12);
   border: 1px solid rgba(110, 170, 255, 0.18);
   border-radius: 999px;
   color: #a9d0ff;
@@ -130,6 +164,7 @@ body {
   display: flex;
   gap: 14px;
   margin-top: 24px;
+  flex-wrap: wrap;
 }
 
 .mini-metrics {
@@ -150,7 +185,7 @@ body {
 }
 
 .mini-metrics span {
-  color: #aebfe0;
+  color: var(--muted);
   font-size: 0.8rem;
 }
 
@@ -162,7 +197,7 @@ body {
 .graph-card {
   width: min(100%, 520px);
   background: rgba(10, 19, 31, 0.9);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 20px 60px rgba(16, 29, 47, 0.55);
@@ -177,7 +212,7 @@ body {
 
 .live-pill {
   background: rgba(93, 243, 176, 0.14);
-  color: #75efb2;
+  color: var(--green);
   border-radius: 999px;
   padding: 6px 9px;
   font-size: 0.72rem;
@@ -186,7 +221,7 @@ body {
 .bars {
   height: 220px;
   display: flex;
-  align-items: end;
+  align-items: flex-end;
   gap: 14px;
   margin: 26px 0;
   padding-top: 18px;
@@ -221,7 +256,7 @@ body {
 }
 
 .alt-bg {
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .section-heading {
@@ -248,7 +283,7 @@ body {
 
 .feature-card {
   background: rgba(11, 21, 33, 0.72);
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
   border-radius: 18px;
   padding: 22px;
 }
@@ -276,7 +311,7 @@ body {
 
 .sidebar {
   background: #0d1b2a;
-  border-right: 1px solid rgba(255,255,255,0.08);
+  border-right: 1px solid var(--border);
   padding: 28px 18px;
 }
 
@@ -294,7 +329,7 @@ body {
 
 .brand p {
   margin: 4px 0 0;
-  color: #8aa4c3;
+  color: var(--muted);
   font-size: 0.75rem;
 }
 
@@ -326,6 +361,7 @@ nav a:hover {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 18px;
 }
 
 .topbar h2 {
@@ -342,13 +378,13 @@ nav a:hover {
 
 .stat-card {
   background: rgba(17, 30, 46, 0.8);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   padding: 18px;
 }
 
 .stat-card .label {
-  color: #8aa4c3;
+  color: var(--muted);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -362,7 +398,7 @@ nav a:hover {
 
 .stat-card .trend {
   font-size: 0.82rem;
-  color: #8de5b1;
+  color: var(--green);
 }
 
 .content-grid {
@@ -374,7 +410,7 @@ nav a:hover {
 
 .panel {
   background: rgba(17, 30, 46, 0.8);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   padding: 18px;
 }
@@ -391,7 +427,7 @@ nav a:hover {
 }
 
 .panel-header span {
-  color: #8aa4c3;
+  color: var(--muted);
   font-size: 0.78rem;
 }
 
@@ -404,11 +440,11 @@ nav a:hover {
 .service-table td {
   text-align: left;
   padding: 10px 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .service-table th {
-  color: #8aa4c3;
+  color: var(--muted);
   font-size: 0.74rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -444,7 +480,7 @@ nav a:hover {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .alert-item:last-child,
@@ -459,7 +495,7 @@ nav a:hover {
 
 .alert-meta span,
 .incident-meta span {
-  color: #8aa4c3;
+  color: var(--muted);
   font-size: 0.8rem;
 }
 
@@ -472,9 +508,9 @@ nav a:hover {
   display: inline-block;
 }
 
-.red-dot { background: #ff6b6b; }
-.orange-dot { background: #ffb703; }
-.green-dot { background: #4cc9a7; }
+.red-dot { background: var(--red); }
+.orange-dot { background: var(--yellow); }
+green-dot { background: var(--green); }
 
 @media (max-width: 860px) {
   .landing-nav {
@@ -504,6 +540,6 @@ nav a:hover {
 
   .sidebar {
     border-right: none;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    border-bottom: 1px solid var(--border);
   }
 }
