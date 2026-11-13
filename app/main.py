@@ -6,6 +6,7 @@ from urllib.parse import quote_plus
 from urllib.request import Request as URLRequest, urlopen
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -15,7 +16,6 @@ app = FastAPI(
     version="1.1.0",
     description="AI-powered observability and incident intelligence platform.",
 )
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
@@ -33,27 +33,22 @@ SERVICE_DATA = [
     {"name": "auth-service", "latency_ms": 141, "error_rate": 0.02, "throughput": 2150, "region": "eu-west-1"},
     {"name": "inventory-service", "latency_ms": 210, "error_rate": 0.06, "throughput": 1680, "region": "ap-south-1"},
 ]
-
 ALERTS = [
     {"id": "ALERT-201", "service": "payments-api", "severity": "high", "message": "Latency spike detected on the payment pipeline."},
     {"id": "ALERT-202", "service": "checkout-api", "severity": "medium", "message": "Error rate above normal threshold for 7 minutes."},
     {"id": "ALERT-203", "service": "inventory-service", "severity": "low", "message": "Throughput dropped by 13% in the last interval."},
 ]
-
 INCIDENTS = [
     {"id": "INC-1001", "service": "payments-api", "status": "Investigating", "summary": "Payment processing latency spike and elevated retry count after deployment.", "impact": "customer checkout degradation"},
     {"id": "INC-1002", "service": "checkout-api", "status": "Mitigated", "summary": "Partial service degradation caused by upstream dependency timeouts.", "impact": "slow storefront response"},
 ]
-
 WEATHER_CODE_MAP = {
-    0: "Clear sky", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
-    45: "Fog", 48: "Rime fog", 51: "Light drizzle", 53: "Moderate drizzle",
-    55: "Heavy drizzle", 56: "Freezing drizzle", 57: "Heavy freezing drizzle",
-    61: "Slight rain", 63: "Moderate rain", 65: "Heavy rain", 66: "Light freezing rain",
-    67: "Heavy freezing rain", 71: "Slight snow", 73: "Moderate snow", 75: "Heavy snow",
-    77: "Snow grains", 80: "Rain showers", 81: "Heavy rain showers", 82: "Violent rain showers",
-    85: "Snow showers", 86: "Heavy snow showers", 95: "Thunderstorm",
-    96: "Thunderstorm with hail", 99: "Severe thunderstorm",
+    0: "Clear sky", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Fog", 48: "Rime fog",
+    51: "Light drizzle", 53: "Moderate drizzle", 55: "Heavy drizzle", 56: "Freezing drizzle", 57: "Heavy freezing drizzle",
+    61: "Slight rain", 63: "Moderate rain", 65: "Heavy rain", 66: "Light freezing rain", 67: "Heavy freezing rain",
+    71: "Slight snow", 73: "Moderate snow", 75: "Heavy snow", 77: "Snow grains", 80: "Rain showers",
+    81: "Heavy rain showers", 82: "Violent rain showers", 85: "Snow showers", 86: "Heavy snow showers",
+    95: "Thunderstorm", 96: "Thunderstorm with hail", 99: "Severe thunderstorm",
 }
 
 
@@ -76,7 +71,7 @@ def _weather_label(code: Any) -> str:
 
 
 def _forecast_at(latitude: float, longitude: float, city: str, country: str = "", timezone: str = "auto") -> Dict[str, Any]:
-    forecast_url = (
+    url = (
         "https://api.open-meteo.com/v1/forecast"
         f"?latitude={latitude}&longitude={longitude}"
         "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m"
@@ -84,67 +79,68 @@ def _forecast_at(latitude: float, longitude: float, city: str, country: str = ""
         "&hourly=temperature_2m,precipitation_probability,weather_code"
         f"&timezone={quote_plus(timezone)}&forecast_days=7&forecast_hours=24"
     )
-    forecast_data = _fetch_json(forecast_url)
-    current = forecast_data.get("current", {})
-    daily = forecast_data.get("daily", {})
-    hourly = forecast_data.get("hourly", {})
+    data = _fetch_json(url)
+    current, daily, hourly = data.get("current", {}), data.get("daily", {}), data.get("hourly", {})
     if not current:
         raise ValueError(f"Weather data unavailable for '{city}'.")
-
-    daily_forecast = []
-    for index, day in enumerate(daily.get("time", [])):
-        daily_forecast.append({
-            "date": day,
-            "high": daily.get("temperature_2m_max", [])[index],
-            "low": daily.get("temperature_2m_min", [])[index],
-            "condition": _weather_label(daily.get("weather_code", [])[index]),
-        })
-
+    daily_forecast = [
+        {"date": day, "high": daily["temperature_2m_max"][i], "low": daily["temperature_2m_min"][i], "condition": _weather_label(daily["weather_code"][i])}
+        for i, day in enumerate(daily.get("time", []))
+    ]
     hourly_forecast = []
-    for index, timestamp in enumerate(hourly.get("time", [])):
+    for i, timestamp in enumerate(hourly.get("time", [])):
         if timestamp < current.get("time", ""):
             continue
         hourly_forecast.append({
             "time": timestamp,
-            "temperature": hourly.get("temperature_2m", [])[index],
-            "precipitation_probability": hourly.get("precipitation_probability", [])[index],
-            "condition": _weather_label(hourly.get("weather_code", [])[index]),
+            "temperature": hourly["temperature_2m"][i],
+            "precipitation_probability": hourly["precipitation_probability"][i],
+            "condition": _weather_label(hourly["weather_code"][i]),
         })
         if len(hourly_forecast) == 12:
             break
-
     return {
-        "city": city,
-        "country": country,
-        "latitude": latitude,
-        "longitude": longitude,
-        "timezone": timezone,
-        "temperature": current.get("temperature_2m"),
-        "feels_like": current.get("apparent_temperature"),
-        "humidity": current.get("relative_humidity_2m"),
-        "wind_speed": current.get("wind_speed_10m"),
-        "condition": _weather_label(current.get("weather_code")),
-        "daily": daily_forecast,
-        "hourly": hourly_forecast,
+        "city": city, "country": country, "latitude": latitude, "longitude": longitude, "timezone": timezone,
+        "temperature": current.get("temperature_2m"), "feels_like": current.get("apparent_temperature"),
+        "humidity": current.get("relative_humidity_2m"), "wind_speed": current.get("wind_speed_10m"),
+        "condition": _weather_label(current.get("weather_code")), "daily": daily_forecast, "hourly": hourly_forecast,
     }
 
 
 def _build_forecast_payload(city: str) -> Dict[str, Any]:
-    query = quote_plus(city.strip())
-    geocode_url = f"https://geocoding-api.open-meteo.com/v1/search?name={query}&count=1&language=en&format=json"
-    search_results = _fetch_json(geocode_url)
-    results = search_results.get("results", [])
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={quote_plus(city.strip())}&count=1&language=en&format=json"
+    results = _fetch_json(url).get("results", [])
     if not results:
         raise ValueError(f"No weather data found for '{city}'.")
-    result = results[0]
-    return _forecast_at(
-        result["latitude"], result["longitude"], result.get("name", city),
-        result.get("country", ""), result.get("timezone", "auto"),
-    )
+    place = results[0]
+    return _forecast_at(place["latitude"], place["longitude"], place.get("name", city), place.get("country", ""), place.get("timezone", "auto"))
 
 
-def _build_forecast_for_coordinates(latitude: float, longitude: float) -> Dict[str, Any]:
-    return _forecast_at(latitude, longitude, "Your location")
+@app.middleware("http")
+async def add_home_weather_preview(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path != "/" or "text/html" not in response.headers.get("content-type", ""):
+        return response
+    body = getattr(response, "body", None)
+    if body is None:
+        return response
+    widget = r'''<style>
+#home-weather-preview{position:fixed;right:22px;bottom:22px;z-index:1000;width:min(310px,calc(100vw - 32px));padding:16px 18px;border:1px solid rgba(148,188,255,.25);border-radius:16px;background:rgba(13,27,42,.96);color:#edf4ff;font:14px Inter,Arial,sans-serif;box-shadow:0 16px 46px rgba(0,0,0,.32);backdrop-filter:blur(12px)}
+#home-weather-preview .hw-top{display:flex;justify-content:space-between;align-items:center;color:#a9d0ff;font-size:10px;font-weight:700;letter-spacing:1.2px}
+#home-weather-preview .hw-live{color:#75efb2}#home-weather-preview .hw-main{display:flex;align-items:center;gap:12px;margin:12px 0 8px}#home-weather-preview .hw-temp{font-size:38px;font-weight:700;letter-spacing:-2px}#home-weather-preview .hw-desc{color:#c5d7f9}#home-weather-preview .hw-foot{display:flex;justify-content:space-between;align-items:center;color:#aebfe0;font-size:12px}#home-weather-preview a{color:#fff;text-decoration:none;background:linear-gradient(135deg,#3ea8ff,#685df2);padding:8px 11px;border-radius:9px;font-weight:600}#home-weather-preview a:hover{filter:brightness(1.12)}
+@media(max-width:600px){#home-weather-preview{right:12px;bottom:12px}}
+</style>
+<aside id="home-weather-preview" aria-label="Local weather preview"><div class="hw-top"><span>LOCAL WEATHER</span><span class="hw-live">● LIVE</span></div><div class="hw-main"><span class="hw-temp" id="hw-temp">—°</span><span class="hw-desc"><strong id="hw-city">San Francisco</strong><br><span id="hw-condition">Loading forecast…</span></span></div><div class="hw-foot"><span id="hw-extra">A quick forecast at a glance</span><a href="/weather">Open weather →</a></div></aside>
+<script>
+(async()=>{try{const r=await fetch('/api/weather?city=San%20Francisco');if(!r.ok)throw new Error('Weather unavailable');const d=await r.json();document.getElementById('hw-temp').textContent=Math.round(d.temperature)+'°';document.getElementById('hw-city').textContent=d.city;document.getElementById('hw-condition').textContent=d.condition;document.getElementById('hw-extra').textContent='Feels like '+Math.round(d.feels_like)+'° · Humidity '+Math.round(d.humidity)+'%'}catch(_e){document.getElementById('hw-condition').textContent='See the latest forecast';document.getElementById('hw-extra').textContent='Weather details are one click away'}})();
+</script>'''
+    html = body.decode("utf-8", errors="replace")
+    if "</body>" not in html.lower():
+        return response
+    import re
+    updated = re.sub(r"</body\s*>", widget + "</body>", html, count=1, flags=re.IGNORECASE)
+    headers = {k: v for k, v in response.headers.items() if k.lower() not in {"content-length", "content-encoding"}}
+    return Response(content=updated, status_code=response.status_code, headers=headers, media_type="text/html")
 
 
 @app.get("/")
@@ -166,7 +162,7 @@ async def weather_dashboard(request: Request):
 def get_weather(city: str = "San Francisco", latitude: float | None = None, longitude: float | None = None) -> Dict[str, Any]:
     try:
         if latitude is not None and longitude is not None:
-            return _build_forecast_for_coordinates(latitude, longitude)
+            return _forecast_at(latitude, longitude, "Your location")
         if latitude is not None or longitude is not None:
             raise ValueError("Both latitude and longitude are required.")
         if not city.strip():
@@ -183,13 +179,13 @@ def health_check() -> Dict[str, str]:
 
 @app.get("/metrics")
 def metrics() -> Dict[str, Any]:
-    service_metrics = []
     counts = {"healthy": 0, "warning": 0, "critical": 0}
+    services = []
     for service in SERVICE_DATA:
         state = classify_signal(service)
         counts[state] += 1
-        service_metrics.append({**service, "status": state})
-    return {"services": service_metrics, "summary": {"healthy_services": counts["healthy"], "warning_services": counts["warning"], "critical_services": counts["critical"]}}
+        services.append({**service, "status": state})
+    return {"services": services, "summary": {"healthy_services": counts["healthy"], "warning_services": counts["warning"], "critical_services": counts["critical"]}}
 
 
 @app.get("/alerts")
