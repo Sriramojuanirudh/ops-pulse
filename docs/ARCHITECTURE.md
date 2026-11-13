@@ -1,63 +1,71 @@
-# OpsPulse Architecture
+# OpsPulse
 
-## Overview
+OpsPulse is an AI-powered observability platform for distributed systems. It helps engineering teams detect anomalies earlier, correlate service signals, and understand incident impact faster.
 
-OpsPulse is an AI-assisted observability platform for engineering teams. It ingests service telemetry, detects anomalies, correlates events, and surfaces likely root cause explanations.
+## What it does
 
-## System design
+- Tracks service health across latency, error rate, and throughput
+- Groups active alerts and incident summaries in a unified dashboard
+- Classifies service health as healthy / warning / critical
+- Exposes clean API endpoints for metrics and incident analysis
+- Provides a startup-ready landing page and operational dashboard
 
-### 1. Frontend dashboard
-- HTML/CSS/JavaScript-generated dashboard
-- Displays service health, alerts, and incidents
-- Serves as a lightweight product experience for MVP validation
+## Tech stack
 
-### 2. API layer
-- FastAPI service exposes endpoints for:
-  - health checks
-  - metrics summaries
-  - active alerts
-  - incident reporting
-  - anomaly analysis
+- Python 3.11
+- FastAPI
+- SQLite for local persistence
+- Jinja2 templates
+- Vanilla JavaScript frontend
 
-### 3. Telemetry model
-- Service signals include:
-  - service name
-  - latency in milliseconds
-  - error rate
-  - throughput
-  - region
+## Project structure
 
-### 4. Intelligence layer
-- Rule-based detection for alerts
-- Correlation logic across service signals
-- AI-ready architecture for future LLM-powered incident summarization
+- `app/main.py` — FastAPI application and request handlers
+- `app/store.py` — SQLite storage and telemetry logic
+- `templates/` — landing and dashboard HTML templates
+- `static/` — CSS and JavaScript frontend assets
+- `data/` — SQLite database storage
 
-### 5. Storage and extension
-- Current MVP uses in-memory data for fast prototyping
-- Future versions can integrate with:
-  - PostgreSQL
-  - Redis
-  - Timeseries databases
-  - Kafka or event brokers
-  - OpenTelemetry collectors
+## Local setup
 
-## Data flow
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
 
-1. Services emit telemetry.
-2. API receives metrics and signal snapshots.
-3. App classifies service health.
-4. Matching rules create alerts and incident summaries.
-5. Dashboard renders operational state to engineering users.
+Then open:
 
-## Future architecture
+- http://localhost:8000/
+- http://localhost:8000/dashboard
 
-- OpenTelemetry collector for logs, metrics, and traces
-- Event ingestion service
-- AI summarization model for incident narratives
-- Notification layer for Slack and email
-- Authentication and RBAC for team access
-- Cloud deployment templates for Kubernetes, Render, or AWS
+## API overview
 
-## Why this architecture fits the product
+- `GET /api/health` — health check
+- `GET /api/metrics` — service summary and incident snapshot
+- `GET /api/incidents` — recent incidents
+- `GET /api/alerts` — active alerts
+- `POST /api/incidents` — create a new incident
+- `POST /api/analyze` — analyze service telemetry payloads
 
-This design is intentionally simple for an MVP while keeping a clear path toward enterprise-scale production systems.
+## Docker
+
+```bash
+docker build -t ops-pulse .
+docker run -p 8000:8000 ops-pulse
+```
+
+Or with Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+## Roadmap
+
+- Add real OpenTelemetry ingestion
+- Add dependency graph mapping
+- Add AI incident summarization and recommendations
+- Add auth, RBAC, and multi-team support
+- Add persistent PostgreSQL and alert routing integrations

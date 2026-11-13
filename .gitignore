@@ -1,9 +1,6 @@
-__pycache__/
-.venv/
-.env
-*.pyc
-*.pyo
-*.pyd
-.DS_Store
-.coverage
-htmlcov/
+APP_ENV=development
+PORT=8000
+LOG_LEVEL=INFO
+SERVICE_NAME=ops-pulse
+OPENAI_API_KEY=
+DATABASE_URL=sqlite:///data/ops_pulse.db
