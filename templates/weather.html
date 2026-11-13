@@ -36,6 +36,14 @@
       <div class="search-extras"><p class="search-hint">Try Tokyo, London, or New York</p><button class="location-button" id="location-button" type="button"><span aria-hidden="true">⌖</span> Use my location</button></div>
     </section>
 
+    <div class="favorites-panel">
+      <div class="favorites-header">
+        <p class="eyebrow">SAVED CITIES</p>
+        <button id="save-current-city" class="save-city-button" type="button">Save current city</button>
+      </div>
+      <div id="favorites-list" class="favorites-list" aria-live="polite"></div>
+    </div>
+
     <div class="status-message" id="status-message" role="status" aria-live="polite">Loading weather…</div>
 
     <section class="current-card" id="current-weather" aria-label="Current weather" hidden>

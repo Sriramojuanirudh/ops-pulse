@@ -3,6 +3,7 @@
   const input = document.getElementById('city-input');
   const button = document.getElementById('search-button');
   const locationButton = document.getElementById('location-button');
+  const saveCurrentCityButton = document.getElementById('save-current-city');
   const themeToggle = document.getElementById('theme-toggle');
   const themeIcon = document.getElementById('theme-icon');
   const status = document.getElementById('status-message');
@@ -11,7 +12,52 @@
   const hourlySection = document.getElementById('hourly-section');
   const forecastGrid = document.getElementById('forecast-grid');
   const hourlyGrid = document.getElementById('hourly-grid');
+  const favoritesList = document.getElementById('favorites-list');
+  const defaultFavorites = ['San Francisco', 'New York', 'Tokyo', 'London'];
   const icons = { clear: '☀', partly: '⛅', cloudy: '☁', fog: '〰', rain: '☂', snow: '❄', storm: 'ϟ' };
+
+  function readFavorites() {
+    try {
+      const stored = JSON.parse(localStorage.getItem('weather-favorites') || '[]');
+      return Array.isArray(stored) ? stored.filter(Boolean) : [];
+    } catch (_err) {
+      return [];
+    }
+  }
+
+  function writeFavorites(items) {
+    try {
+      localStorage.setItem('weather-favorites', JSON.stringify(items));
+    } catch (_err) {
+      // ignore storage failures
+    }
+  }
+
+  function renderFavorites() {
+    const favorites = readFavorites();
+    const items = favorites.length ? favorites : defaultFavorites;
+    favoritesList.innerHTML = '';
+    items.forEach((city) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'favorite-chip';
+      chip.textContent = city;
+      chip.addEventListener('click', () => {
+        input.value = city;
+        loadWeather(city);
+      });
+      favoritesList.appendChild(chip);
+    });
+  }
+
+  function saveCurrentCity() {
+    const city = (input.value || '').trim();
+    if (!city) return;
+    const favorites = readFavorites();
+    const next = [city, ...favorites.filter((entry) => entry.toLowerCase() !== city.toLowerCase())].slice(0, 6);
+    writeFavorites(next);
+    renderFavorites();
+  }
 
   function iconFor(condition) {
     const text = condition.toLowerCase();
@@ -29,7 +75,7 @@
     const isLight = theme === 'light';
     themeIcon.textContent = isLight ? '☾' : '☼';
     themeToggle.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} theme`);
-    try { localStorage.setItem('weather-theme', theme); } catch (_) { /* storage may be unavailable */ }
+    try { localStorage.setItem('weather-theme', theme); } catch (_) {}
   }
 
   function dayName(dateString, index) {
@@ -122,6 +168,7 @@
   }
 
   form.addEventListener('submit', (event) => { event.preventDefault(); loadWeather(input.value); });
+
   locationButton.addEventListener('click', () => {
     if (!navigator.geolocation) {
       showError('Location is not available in this browser. You can search for a city instead.');
@@ -140,9 +187,13 @@
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 },
     );
   });
+
+  saveCurrentCityButton.addEventListener('click', saveCurrentCity);
   themeToggle.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'));
+
   let savedTheme = 'dark';
-  try { savedTheme = localStorage.getItem('weather-theme') || 'dark'; } catch (_) { /* storage may be unavailable */ }
+  try { savedTheme = localStorage.getItem('weather-theme') || 'dark'; } catch (_) {}
   setTheme(savedTheme);
+  renderFavorites();
   loadWeather(input.value || 'San Francisco');
 })();

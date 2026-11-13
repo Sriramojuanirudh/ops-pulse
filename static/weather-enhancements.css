@@ -1,4 +1,4 @@
-/* Weather dashboard enhancements: theme, geolocation, and hourly forecast. */
+/* Weather dashboard enhancements: theme, geolocation, hourly forecast, and saved cities. */
 :root[data-theme='light'] {
   color-scheme: light;
   --ink: #1b2b40;
@@ -45,6 +45,13 @@
 .location-button { padding: 5px 0; border: 0; background: transparent; color: var(--blue); font: 600 11px 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; }
 .location-button:hover { color: var(--accent); }
 .location-button:disabled { opacity: .6; cursor: wait; }
+.favorites-panel { width: min(800px, 100%); margin: 18px auto 0; padding: 14px 16px 12px; border: 1px solid var(--line); border-radius: 16px; background: rgba(16, 27, 44, 0.35); }
+.favorites-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.favorites-header .eyebrow { margin: 0; }
+.save-city-button { border: 1px solid rgba(244, 200, 117, .3); border-radius: 999px; background: rgba(244, 200, 117, .1); color: var(--accent); padding: 7px 12px; font: 600 11px 'DM Sans', sans-serif; cursor: pointer; }
+.favorites-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.favorite-chip { border: 1px solid rgba(255,255,255,.08); border-radius: 999px; padding: 8px 12px; background: rgba(255,255,255,.04); color: var(--ink); cursor: pointer; }
+.favorite-chip:hover { border-color: rgba(244,200,117,.5); }
 .hourly-section { padding-top: 30px; }
 .hourly-grid { display: grid; grid-auto-columns: minmax(75px, 1fr); grid-auto-flow: column; gap: 9px; overflow-x: auto; padding: 2px 2px 12px; scrollbar-color: rgba(157,170,189,.4) transparent; }
 .hour-card { min-height: 126px; padding: 13px 8px; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 1px solid rgba(223,232,245,.09); border-radius: 13px; background: var(--panel); }
