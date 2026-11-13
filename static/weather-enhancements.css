@@ -1,0 +1,60 @@
+/* Weather dashboard enhancements: theme, geolocation, and hourly forecast. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --ink: #1b2b40;
+  --muted: #64748b;
+  --soft: #52647a;
+  --line: rgba(36, 57, 82, .14);
+  --panel: rgba(255, 255, 255, .82);
+  --accent: #c68a28;
+  --blue: #4774ac;
+}
+
+:root[data-theme='light'] body {
+  background: #edf3fa;
+  background-image: radial-gradient(ellipse at 70% 2%, rgba(116, 161, 213, .19), transparent 34%),
+    radial-gradient(ellipse at 18% 42%, rgba(132, 155, 186, .13), transparent 40%);
+  color: var(--ink);
+}
+:root[data-theme='light'] .current-card { background: linear-gradient(115deg, rgba(255,255,255,.92), rgba(226,236,248,.92) 58%, rgba(242,236,222,.95)); }
+:root[data-theme='light'] .search-form { background: rgba(255,255,255,.72); border-color: rgba(36,57,82,.18); }
+:root[data-theme='light'] .search-form input { color: var(--ink); }
+:root[data-theme='light'] .forecast-day { border-color: rgba(36,57,82,.12); }
+:root[data-theme='light'] .forecast-day.is-today { background: linear-gradient(180deg, rgba(237,211,165,.32), var(--panel)); }
+:root[data-theme='light'] .topbar-note { color: #52647a; }
+:root[data-theme='light'] .brand { color: var(--ink); }
+:root[data-theme='light'] .brand-mark { color: #fff; background: #4774ac; }
+:root[data-theme='light'] .brand-accent { color: #a76e13; }
+:root[data-theme='light'] .location-line h2,
+:root[data-theme='light'] .condition,
+:root[data-theme='light'] .detail-item strong,
+:root[data-theme='light'] .section-heading h2,
+:root[data-theme='light'] .forecast-day-name,
+:root[data-theme='light'] .temperature-range strong { color: #1b2b40; }
+:root[data-theme='light'] .detail-label,
+:root[data-theme='light'] .feels-like,
+:root[data-theme='light'] .forecast-condition,
+:root[data-theme='light'] .temperature-range span { color: #64748b; }
+:root[data-theme='light'] .page-footer a { color: #52647a; }
+
+.topbar-actions { display: flex; align-items: center; gap: 18px; }
+.theme-toggle { width: 36px; height: 36px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--ink); font-size: 19px; cursor: pointer; }
+.theme-toggle:hover { border-color: var(--accent); }
+.search-extras { width: min(490px, 100%); margin: 10px auto 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.search-extras .search-hint { margin: 0; }
+.location-button { padding: 5px 0; border: 0; background: transparent; color: var(--blue); font: 600 11px 'DM Sans', sans-serif; cursor: pointer; white-space: nowrap; }
+.location-button:hover { color: var(--accent); }
+.location-button:disabled { opacity: .6; cursor: wait; }
+.hourly-section { padding-top: 30px; }
+.hourly-grid { display: grid; grid-auto-columns: minmax(75px, 1fr); grid-auto-flow: column; gap: 9px; overflow-x: auto; padding: 2px 2px 12px; scrollbar-color: rgba(157,170,189,.4) transparent; }
+.hour-card { min-height: 126px; padding: 13px 8px; display: flex; flex-direction: column; align-items: center; gap: 10px; border: 1px solid rgba(223,232,245,.09); border-radius: 13px; background: var(--panel); }
+.hour-card.is-current-hour { border-color: rgba(244,200,117,.34); }
+.hour-time { color: var(--muted); font-size: 11px; }
+.hour-icon { color: var(--accent); font-size: 22px; line-height: 1; }
+.hour-temperature { color: var(--ink); font: 700 15px 'Manrope', sans-serif; }
+.hour-rain { color: var(--blue); font-size: 10px; }
+@media (max-width: 560px) {
+  .topbar-actions { gap: 10px; }
+  .search-extras { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .hourly-grid { grid-auto-columns: 76px; }
+}
