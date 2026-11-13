@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2c">
+  <title>Weather — OpsPulse</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/weather.css">
+  <script src="/static/weather.js" defer></script>
+</head>
+<body>
+  <main class="weather-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="OpsPulse home">
+        <span class="brand-mark" aria-hidden="true">◒</span>
+        <span>sky<span class="brand-accent">cast</span></span>
+      </a>
+      <div class="topbar-note"><span class="live-dot"></span> LIVE WEATHER <span class="note-divider">·</span> POWERED BY OPEN-METEO</div>
+      <a class="back-link" href="/">← <span>OpsPulse</span></a>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">YOUR LOCAL FORECAST</p>
+      <h1 id="page-title">Weather, at a glance.</h1>
+      <p class="intro-copy">A little more sunshine in your day starts with knowing what’s ahead.</p>
+      <form class="search-form" id="city-form" role="search">
+        <span class="search-icon" aria-hidden="true">⌕</span>
+        <label class="visually-hidden" for="city-input">Search city</label>
+        <input id="city-input" name="city" type="search" value="{{ default_city }}" placeholder="Search a city..." autocomplete="off" required>
+        <button type="submit" id="search-button">Search <span aria-hidden="true">→</span></button>
+      </form>
+      <p class="search-hint">Try a city name like Tokyo, London, or New York</p>
+    </section>
+
+    <div class="status-message" id="status-message" role="status" aria-live="polite">Loading weather…</div>
+
+    <section class="current-card" id="current-weather" aria-label="Current weather" hidden>
+      <div class="current-main">
+        <div class="location-line"><span class="pin-icon" aria-hidden="true">⌖</span><h2 id="location-name">—</h2></div>
+        <p class="today-label" id="today-label">CURRENT CONDITIONS</p>
+        <div class="temperature-row">
+          <span class="weather-icon" id="current-icon" aria-hidden="true">☀</span>
+          <p class="temperature"><span id="temperature">—</span><span class="degree">°</span></p>
+        </div>
+        <p class="condition" id="condition">—</p>
+        <p class="feels-like">Feels like <span id="feels-like">—</span>°</p>
+      </div>
+      <div class="current-details">
+        <div class="detail-heading"><span>RIGHT NOW</span><span class="detail-line"></span></div>
+        <div class="detail-item">
+          <span class="detail-icon humidity-icon" aria-hidden="true">◉</span>
+          <div><span class="detail-label">Humidity</span><strong id="humidity">—</strong></div>
+          <span class="detail-unit">%</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon wind-icon" aria-hidden="true">〰</span>
+          <div><span class="detail-label">Wind speed</span><strong id="wind-speed">—</strong></div>
+          <span class="detail-unit">km/h</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-icon coord-icon" aria-hidden="true">⊕</span>
+          <div><span class="detail-label">Coordinates</span><strong id="coordinates">—</strong></div>
+        </div>
+      </div>
+      <div class="sun-orb" aria-hidden="true"></div>
+    </section>
+
+    <section class="forecast-section" id="forecast-section" aria-labelledby="forecast-heading" hidden>
+      <div class="section-heading">
+        <div><p class="eyebrow">PLAN AHEAD</p><h2 id="forecast-heading">7-day forecast</h2></div>
+        <span class="forecast-caption">The week, in a nutshell</span>
+      </div>
+      <div class="forecast-grid" id="forecast-grid"></div>
+    </section>
+
+    <footer class="page-footer">
+      <span>Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a></span>
+      <span>Forecasts for wherever you are.</span>
+    </footer>
+  </main>
+</body>
+</html>
